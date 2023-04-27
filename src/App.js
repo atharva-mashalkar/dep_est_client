@@ -1,23 +1,25 @@
-import logo from './logo.svg';
+import React, { useEffect,  useState} from 'react';
+import { w3cwebsocket as W3CWebSocket } from 'websocket';
 import './App.css';
+import WebcamVideo from './components/Webcam';
 
 function App() {
+
+  const client = new W3CWebSocket('ws://127.0.0.1:8000');
+
+  useEffect(() => {
+    client.onopen = () => {
+      console.log('WebSocket Client Connected');
+    };
+    client.onmessage = (message) => {
+      const dataFromServer = JSON.parse(message.data);
+      console.log("Got Reply! ", dataFromServer);
+    };
+  }, [])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <WebcamVideo client = {client}/>
     </div>
   );
 }

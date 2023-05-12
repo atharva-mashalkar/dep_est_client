@@ -1,25 +1,51 @@
 import React, { useEffect,  useState} from 'react';
 import { w3cwebsocket as W3CWebSocket } from 'websocket';
 import './App.css';
-import WebcamVideo from './components/Webcam';
+import WebcamComponent from './components/Webcam';
 
 function App() {
 
-  const client = new W3CWebSocket('ws://127.0.0.1:8000');
+  const [camDim, setCamDim] = useState(null)
+  const [users, setUsers] = useState(null);
+  const [originalImg, setOriginalImg] = useState(null)
+  const [depthMap, setDepthMap] = useState(null)
+  const [croppedImg, setCroppedImg] = useState(null)
+  const [maxDep, setMaxDep] = useState(null)
+
+  let certPath = "/home/atharva/Documents/DDP/DepthEstimation/website/client/cert.pem"
 
   useEffect(() => {
+    //Connecting to the server
+    // const client = new W3CWebSocket('ws://127.0.0.1:8000');
+    const client = new W3CWebSocket('wss://0.tcp.in.ngrok.io:17752')
     client.onopen = () => {
       console.log('WebSocket Client Connected');
+      setUsers(client);
     };
+    //Receiving camera dimentions
     client.onmessage = (message) => {
       const dataFromServer = JSON.parse(message.data);
-      console.log("Got Reply! ", dataFromServer);
+      console.log("Got Reply!");
+      if(dataFromServer && dataFromServer.Height != null){
+        setCamDim({height:dataFromServer.Height, width:dataFromServer.Width})
+      }
+      if(dataFromServer && dataFromServer.maxHeat){
+        setMaxDep(dataFromServer.maxHeat)
+      }
+      if(dataFromServer && dataFromServer.originaImg){
+        setOriginalImg(dataFromServer.originaImg)
+        setDepthMap(dataFromServer.depthMap)
+        setCroppedImg(dataFromServer.croppedImg)
+      }
     };
+    // Close socket on unmount:
+    return () => client.close();
   }, [])
 
   return (
     <div className="App">
-      <WebcamVideo client = {client}/>
+      {/* <WebcamComponent client = {users} camDim = {camDim} originaImg={originalImg} depthMap={depthMap} croppedImg={croppedImg}/> */}
+      <WebcamComponent client = {users} camDim = {camDim} maxDep = {maxDep} originaImg={originalImg} depthMap={depthMap} croppedImg={croppedImg}/>
     </div>
   );
 }

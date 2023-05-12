@@ -1,51 +1,113 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Webcam from "react-webcam";
+import { useFrequency } from "react-frequency";
 
-function WebcamImage({client}) {
+// function WebcamComponent({client, camDim, originaImg, depthMap, croppedImg}) {
+function WebcamComponent({client, camDim, maxDep, originaImg, depthMap, croppedImg}) {
 
   const [img, setImg] = useState(null);
   const webcamRef = useRef(null);
+  const [videoConstraints, setVideoConstraints] = useState(null);
+  const [frequency, setFrequency] = useState(174);
 
-  const videoConstraints = {
-    width: 420,
-    height: 420,
-    facingMode: "environment",
+  const { toggle, start, stop, playing } = useFrequency({
+    hz: frequency,
+    // type,
+    // gain: gain / 100,
+    // oscillator
+  });
+
+  useEffect(() => {
+    var interval = 0
+    if(videoConstraints && client){
+      interval = setInterval(() => {
+        capture()
+      }, 100)
+    }
+    return () => {
+      clearTimeout(interval)
+    };
+  },[videoConstraints, client])
+
+  useEffect(() => {
+    if(camDim && camDim.width){
+      setVideoConstraints({
+        width: camDim.height,
+        height: camDim.width,
+        facingMode: "environment",
+      })
+    }
+  }, [camDim])
+
+  const capture = () => {
+    if(videoConstraints && client){
+      const imageSrc = webcamRef.current.getScreenshot();
+      client.send(
+          JSON.stringify({
+          type: "message",
+          msg: imageSrc
+          })
+      );
+    }
   };
 
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setImg(imageSrc);
-    client.send(
-        JSON.stringify({
-        type: "message",
-        msg: imageSrc
-        })
-    );
-  }, [webcamRef]);
+  useEffect(() => {
+    console.log(maxDep)
+    if(maxDep > 150){
+      setFrequency(100+(parseInt(maxDep)-150)*7)
+      if(!playing){
+        start()
+      }
+    }
+    setTimeout(() => {
+      if(maxDep<150){
+        setFrequency(0)
+      }
+    }, 200)
+  }, [maxDep]);
 
   return (
     <div className="Container">
-      {img === null ? (
-        <>
-          <Webcam
+      {
+        videoConstraints ? 
+        <Webcam
             audio={false}
-            mirrored={true}
-            height={400}
-            width={400}
+            mirrored={false}
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             videoConstraints={videoConstraints}
-          />
-          <button onClick={capture}>Capture photo</button>
-        </>
-      ) : (
-        <>
-          <img src={img} alt="screenshot" />
-          <button onClick={() => setImg(null)}>Retake</button>
-        </>
-      )}
+          />:
+          null
+      }
+      <div>
+        {
+          maxDep > 150 && maxDep <= 180 ? 
+          <h2>Object Detected</h2>: null
+        }
+        {
+          maxDep > 180 && maxDep <= 220 ? 
+          <h2>Object Coming Closer</h2>: null
+        }
+        {
+          maxDep > 220? 
+          <h2>Alert: Object Very Close</h2>: null
+        }
+      {/* {
+        originaImg ?
+        <img src = {originaImg}/> : null
+      }
+      {
+        depthMap ?
+        <img src = {depthMap}/> : null
+      }
+      {
+        croppedImg && croppedImg !== "" ?
+        <img src = {croppedImg}/> : null 
+      } */}
+      </div>
     </div>
+    
   );
 }
 
-export default WebcamImage;
+export default WebcamComponent;

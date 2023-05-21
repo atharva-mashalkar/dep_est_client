@@ -16,8 +16,9 @@ function App() {
 
   useEffect(() => {
     //Connecting to the server
-    // const client = new W3CWebSocket('ws://127.0.0.1:8000');
-    const client = new W3CWebSocket('wss://0.tcp.in.ngrok.io:17752')
+    const client = new W3CWebSocket('wss://server.walkbuddy.in');
+    // console.log(client)
+    // const client = new W3CWebSocket('ws://0.tcp.in.ngrok.io:11856')
     client.onopen = () => {
       console.log('WebSocket Client Connected');
       setUsers(client);

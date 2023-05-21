@@ -92,7 +92,7 @@ function WebcamComponent({client, camDim, maxDep, originaImg, depthMap, croppedI
           maxDep > 220? 
           <h2>Alert: Object Very Close</h2>: null
         }
-      {/* {
+      {
         originaImg ?
         <img src = {originaImg}/> : null
       }
@@ -103,7 +103,7 @@ function WebcamComponent({client, camDim, maxDep, originaImg, depthMap, croppedI
       {
         croppedImg && croppedImg !== "" ?
         <img src = {croppedImg}/> : null 
-      } */}
+      }
       </div>
     </div>
     

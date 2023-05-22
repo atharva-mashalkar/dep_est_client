@@ -9,11 +9,12 @@ function WebcamComponent({client, camDim, maxDep, originaImg, depthMap, croppedI
   const webcamRef = useRef(null);
   const [videoConstraints, setVideoConstraints] = useState(null);
   const [frequency, setFrequency] = useState(174);
+  const [gain, getGain] = useState(0.3);
 
   const { toggle, start, stop, playing } = useFrequency({
     hz: frequency,
     // type,
-    // gain: gain / 100,
+    gain: gain,
     // oscillator
   });
 
@@ -54,7 +55,8 @@ function WebcamComponent({client, camDim, maxDep, originaImg, depthMap, croppedI
   useEffect(() => {
     console.log(maxDep)
     if(maxDep > 150){
-      setFrequency(100+(parseInt(maxDep)-150)*7)
+      setFrequency(100+(parseInt(maxDep)-150)*10)
+      setFrequency(Math.min(0.3+(parseInt(maxDep)-150)/100, 1))
       if(!playing){
         start()
       }

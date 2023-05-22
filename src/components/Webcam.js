@@ -9,12 +9,12 @@ function WebcamComponent({client, camDim, maxDep, originaImg, depthMap, croppedI
   const webcamRef = useRef(null);
   const [videoConstraints, setVideoConstraints] = useState(null);
   const [frequency, setFrequency] = useState(174);
-  const [gain, getGain] = useState(0.3);
+  // const [gain, getGain] = useState(0.3);
 
   const { toggle, start, stop, playing } = useFrequency({
     hz: frequency,
     // type,
-    gain: gain,
+    gain: 1,
     // oscillator
   });
 
@@ -55,8 +55,8 @@ function WebcamComponent({client, camDim, maxDep, originaImg, depthMap, croppedI
   useEffect(() => {
     console.log(maxDep)
     if(maxDep > 150){
-      setFrequency(100+(parseInt(maxDep)-150)*10)
-      setFrequency(Math.min(0.3+(parseInt(maxDep)-150)/100, 1))
+      setFrequency(100+(parseInt(maxDep)-150)*8)
+      // setFrequency(Math.min(0.3+(parseInt(maxDep)-150)/100, 1))
       if(!playing){
         start()
       }
@@ -87,11 +87,11 @@ function WebcamComponent({client, camDim, maxDep, originaImg, depthMap, croppedI
           <h2>Object Detected</h2>: null
         }
         {
-          maxDep > 180 && maxDep <= 220 ? 
+          maxDep > 180 && maxDep <= 210 ? 
           <h2>Object Coming Closer</h2>: null
         }
         {
-          maxDep > 220? 
+          maxDep > 210? 
           <h2>Alert: Object Very Close</h2>: null
         }
       {
